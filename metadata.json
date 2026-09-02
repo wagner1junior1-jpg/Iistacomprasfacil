@@ -1,0 +1,6 @@
+{
+  "name": "Lista e Comparador de Compras Mensal",
+  "description": "Sistema completo para compras mensais com comparador de preços entre supermercados, listas interativas offline, histórico de gastos, gráficos financeiros, modo escuro e exportação para planilhas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

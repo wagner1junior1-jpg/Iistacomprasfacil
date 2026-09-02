@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>MercadoFácil - Compras Mensais & Comparador</title>
+    <meta name="description" content="Sistema completo para compras mensais com comparador de preços entre supermercados, listas interativas offline, histórico de gastos, gráficos financeiros, modo escuro e exportação para planilhas." />
+    
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <meta name="theme-color" content="#2F7D4E" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MercadoFácil" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('MercadoFácil: SW ativo:', reg.scope);
+          }).catch(function(err) {
+            console.warn('MercadoFácil: Erro SW:', err);
+          });
+        });
+      }
+    </script>
+
+    <meta property="og:title" content="MercadoFácil - Lista e Comparador de Compras Mensal" />
+    <meta property="og:description" content="Sistema completo para compras mensais com comparador de preços entre supermercados, listas interativas offline, histórico de gastos, gráficos financeiros, modo escuro e exportação para planilhas." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        try {
+          var migrated = localStorage.getItem('theme_migrated_to_light_v1');
+          if (!migrated) {
+            document.documentElement.classList.remove('dark');
+            return;
+          }
+          var settings = JSON.parse(localStorage.getItem('smart_shopping_settings') || '{}');
+          if (settings.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="font-sans antialiased selection:bg-emerald-500 selection:text-white overscroll-none">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F7D4E" />
+      <stop offset="100%" stop-color="#1B4D3E" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.25" />
+    </filter>
+  </defs>
+  <!-- Background Rounded Rect -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  
+  <!-- Outer subtle border -->
+  <rect x="8" y="8" width="496" height="496" rx="104" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="4" />
+
+  <!-- Shopping Cart Emblem -->
+  <g filter="url(#shadow)" transform="translate(40, 40)">
+    <!-- Cart Body -->
+    <path d="M 64 80 L 110 80 L 160 270 L 340 270 L 380 130 L 130 130" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="26" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+    
+    <!-- Cart Goods inside (Apples, Bag, etc.) -->
+    <circle cx="200" cy="190" r="32" fill="#F59E0B" opacity="0.9" />
+    <rect x="235" y="155" width="48" height="60" rx="12" fill="#3B82F6" opacity="0.9" />
+    <circle cx="295" cy="195" r="28" fill="#EC4899" opacity="0.9" />
+
+    <!-- Wheels -->
+    <circle cx="180" cy="335" r="30" fill="#FFFFFF" />
+    <circle cx="180" cy="335" r="14" fill="#1B4D3E" />
+    <circle cx="320" cy="335" r="30" fill="#FFFFFF" />
+    <circle cx="320" cy="335" r="14" fill="#1B4D3E" />
+
+    <!-- Checkmark Badge on top right -->
+    <circle cx="360" cy="80" r="42" fill="#10B981" stroke="#FFFFFF" stroke-width="8" />
+    <path d="M 345 80 L 355 90 L 375 70" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
