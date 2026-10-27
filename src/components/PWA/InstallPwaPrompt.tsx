@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useModalA11y } from '../../utils/useModalA11y';
 import { Download, X, Share, Smartphone, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -12,6 +13,7 @@ export const InstallPwaPrompt: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const guideDialogRef = useModalA11y(showGuide, () => setShowGuide(false));
 
   useEffect(() => {
     // Verifica se já está rodando como app instalado (standalone)
@@ -132,7 +134,7 @@ export const InstallPwaPrompt: React.FC = () => {
       {/* Modal Guia de Instalação (Android / iOS / PC) */}
       {showGuide && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 text-slate-800 dark:text-slate-100">
+          <div ref={guideDialogRef} role="dialog" aria-modal="true" aria-label="Guia de instalação" className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 text-slate-800 dark:text-slate-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-emerald-600" />

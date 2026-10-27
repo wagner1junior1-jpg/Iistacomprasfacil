@@ -19,6 +19,7 @@ import { getProductThumbnail } from '../../utils/productImages';
 import { compressImage } from '../../utils/imageCompressor';
 import { searchCatalogProducts, CatalogProduct, PRODUCT_CATALOG } from '../../data/productCatalog';
 import { getCategoryIcon } from '../../utils/icons';
+import { useModalA11y } from '../../utils/useModalA11y';
 
 interface ItemModalProps {
   isOpen: boolean;
@@ -71,6 +72,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({
   // Voice recording state
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useModalA11y(isOpen, onClose);
 
   useEffect(() => {
     if (itemToEdit) {
@@ -197,11 +199,10 @@ export const ItemModal: React.FC<ItemModalProps> = ({
         const compressed = await compressImage(file, 600, 0.75);
         setCustomImage(compressed);
       } catch {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setCustomImage(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+        // Não grava a foto original (pode ter vários MB e estourar o armazenamento local)
+        window.alert('Não foi possível processar esta imagem. Tente outra foto (JPG ou PNG).');
+      } finally {
+        e.target.value = '';
       }
     }
   };
@@ -210,7 +211,9 @@ export const ItemModal: React.FC<ItemModalProps> = ({
     if (e) e.preventDefault();
     if (!name.trim()) return;
 
-    const parsedPrice = price ? parseFloat(price.replace(',', '.')) : null;
+    // Invalid text (e.g. "abc") is treated as "no price" instead of saving NaN
+    const rawPrice = price.trim() ? parseFloat(price.replace(',', '.')) : NaN;
+    const parsedPrice = Number.isFinite(rawPrice) && rawPrice >= 0 ? rawPrice : null;
 
     onSave({
       name: name.trim(),
@@ -231,7 +234,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 w-full sm:max-w-md min-h-screen sm:min-h-0 sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={itemToEdit ? 'Editar item' : 'Novo item'} className="bg-white dark:bg-slate-900 w-full sm:max-w-md min-h-screen sm:min-h-0 sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
         
         {/* Top Header Bar - Matching Screenshot 2 */}
         <div className="bg-[#2F7D4E] text-white px-4 h-14 flex items-center justify-between shadow-md shrink-0">
@@ -466,7 +469,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({
                 type="text"
                 placeholder="0,00"
                 value={price}
-                onChange={e => setPrice(e.target.value)}
+                onChange={e => setPrice(e.target.value.replace(/[^\d.,]/g, ''))}
                 className="w-full pb-2 pt-1 border-b-2 border-slate-300 dark:border-slate-700 focus:border-[#2F7D4E] dark:focus:border-emerald-400 bg-transparent text-base text-slate-900 dark:text-white font-mono outline-none"
               />
             </div>

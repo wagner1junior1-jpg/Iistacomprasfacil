@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShopping } from '../../context/ShoppingContext';
-import { formatCurrency } from '../../utils/helpers';
+import { formatCurrency, getLocalDateKey } from '../../utils/helpers';
+import { useModalA11y } from '../../utils/useModalA11y';
 import {
   FileSpreadsheet,
   Download,
@@ -33,6 +34,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => 
 
   const [copiedText, setCopiedText] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const dialogRef = useModalA11y(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -95,7 +97,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `backup_mercadofacil_${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `backup_mercadofacil_${getLocalDateKey()}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -129,7 +131,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Exportar e backup" className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">

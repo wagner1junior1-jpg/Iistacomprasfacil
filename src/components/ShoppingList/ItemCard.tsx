@@ -73,10 +73,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(item.id, -1)}
-                  className="w-5 h-5 flex items-center justify-center rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                  title="Diminuir quantidade"
+                  className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                  title="Diminuir quantidade" aria-label="Diminuir quantidade"
                 >
-                  <Minus className="w-3 h-3" />
+                  <Minus className="w-4 h-4" />
                 </button>
                 <span className="px-1.5 font-mono text-[11px] text-slate-700 dark:text-slate-200">
                   {item.quantity} {item.unit}
@@ -84,10 +84,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
                 <button
                   type="button"
                   onClick={() => onUpdateQuantity(item.id, 1)}
-                  className="w-5 h-5 flex items-center justify-center rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                  title="Aumentar quantidade"
+                  className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                  title="Aumentar quantidade" aria-label="Aumentar quantidade"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
             ) : (
@@ -150,7 +150,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               onDelete(item.id);
             }
           }}
-          className="p-1.5 sm:p-2 text-slate-300 hover:text-red-500 active:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
+          className="p-3 sm:p-2.5 text-slate-500 dark:text-slate-400 hover:text-red-500 active:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
           title={`Excluir ${item.name} da lista`}
           aria-label={`Excluir ${item.name}`}
         >
@@ -165,10 +165,10 @@ export const ItemCard: React.FC<ItemCardProps> = ({
               e.stopPropagation();
               onToggleBought(item.id);
             }}
-            className={`w-7 h-7 sm:w-6 sm:h-6 rounded-md flex items-center justify-center transition-all cursor-pointer ${
+            className={`w-8 h-8 sm:w-6 sm:h-6 rounded-md flex items-center justify-center transition-all cursor-pointer ${
               item.bought
                 ? 'bg-[#B8DAC0] dark:bg-emerald-600 border border-[#9FC8A8] dark:border-emerald-500 text-emerald-900 dark:text-white shadow-xs'
-                : 'border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-emerald-500'
+                : 'border-2 border-slate-500 dark:border-slate-500 bg-white dark:bg-slate-800 hover:border-emerald-500'
             }`}
             title={item.bought ? 'Desmarcar do carrinho' : 'Marcar como comprado (colocar no carrinho)'}
             aria-label={item.bought ? 'Desmarcar' : 'Marcar'}

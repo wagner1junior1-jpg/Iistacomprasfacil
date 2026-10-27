@@ -74,7 +74,7 @@ export const FinancialDashboardView: React.FC = () => {
   // Budget for current month
   const currentMonthBudget = settings.monthlyBudgets[selectedMonth] || 1000;
   const budgetRemaining = currentMonthBudget - currentMonthTotalSpent;
-  const budgetPercentage = currentMonthBudget > 0 ? Math.min(100, Math.round((currentMonthTotalSpent / currentMonthBudget) * 100)) : 0;
+  const budgetPercentage = currentMonthBudget > 0 ? Math.round((currentMonthTotalSpent / currentMonthBudget) * 100) : 0;
 
   // Next month planning calculations
   const nextMonthKey = getNextMonthKey(selectedMonth);
@@ -340,7 +340,7 @@ export const FinancialDashboardView: React.FC = () => {
                 <XAxis dataKey="monthLabel" fontSize={11} stroke="#64748b" />
                 <YAxis fontSize={11} stroke="#64748b" />
                 <Tooltip
-                  formatter={(value: number) => [formatCurrency(value), '']}
+                  formatter={(value) => [formatCurrency(Number(value)), '']}
                   contentStyle={{
                     borderRadius: '0.75rem',
                     fontSize: '12px',
@@ -393,7 +393,7 @@ export const FinancialDashboardView: React.FC = () => {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(val: number) => [formatCurrency(val), '']}
+                      formatter={(val) => [formatCurrency(Number(val)), '']}
                       contentStyle={{
                         borderRadius: '0.75rem',
                         fontSize: '12px',

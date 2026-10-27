@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useModalA11y } from '../../utils/useModalA11y';
 import { useShopping } from '../../context/ShoppingContext';
 import { ShoppingCart, GitCompare, TrendingUp, FolderTree, Scale, Star, X } from 'lucide-react';
 
@@ -9,6 +10,7 @@ interface BottomNavBarProps {
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({ onOpenCalculator }) => {
   const { activeTab, setActiveTab, items, activeListId } = useShopping();
   const [isCreditsOpen, setIsCreditsOpen] = useState(false);
+  const creditsDialogRef = useModalA11y(isCreditsOpen, () => setIsCreditsOpen(false));
 
   const currentListItems = items.filter(i => !i.listId || i.listId === activeListId);
   const pendingCount = currentListItems.filter(i => !i.bought).length;
@@ -124,6 +126,10 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ onOpenCalculator }) 
           onClick={() => setIsCreditsOpen(false)}
         >
           <div
+            ref={creditsDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Créditos"
             className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-xs w-full shadow-2xl text-center relative animate-in zoom-in-95 duration-200 select-none"
             onClick={(e) => e.stopPropagation()}
           >

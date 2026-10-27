@@ -13,6 +13,7 @@ import { PRODUCT_CATALOG, CatalogProduct } from '../../data/productCatalog';
 import { Category, ShoppingItem } from '../../types';
 import { getCategoryIcon } from '../../utils/icons';
 import { formatCurrency } from '../../utils/helpers';
+import { useModalA11y } from '../../utils/useModalA11y';
 
 interface ProductCatalogModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+  const dialogRef = useModalA11y(isOpen, onClose);
 
   // Filter products by category and search term
   const filteredProducts = useMemo(() => {
@@ -88,7 +90,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Catálogo de produtos" className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-emerald-500/10 shrink-0">

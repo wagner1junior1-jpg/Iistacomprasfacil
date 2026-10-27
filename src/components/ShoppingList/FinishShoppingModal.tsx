@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingItem, Supermarket } from '../../types';
 import { formatCurrency } from '../../utils/helpers';
+import { useModalA11y } from '../../utils/useModalA11y';
 import { CheckCircle2, Store, Calendar, DollarSign, X, ArrowRight } from 'lucide-react';
 
 interface FinishShoppingModalProps {
@@ -30,6 +31,7 @@ export const FinishShoppingModal: React.FC<FinishShoppingModalProps> = ({
   const [totalSpentStr, setTotalSpentStr] = useState('');
   const [notes, setNotes] = useState('');
   const [archiveBoughtOnly, setArchiveBoughtOnly] = useState(true);
+  const dialogRef = useModalA11y(isOpen, onClose);
 
   // Calculate default total
   const autoCalculatedTotal = boughtItems.reduce((sum, item) => {
@@ -85,7 +87,7 @@ export const FinishShoppingModal: React.FC<FinishShoppingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Finalizar compra" className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-emerald-500/10">

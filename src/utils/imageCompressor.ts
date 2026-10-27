@@ -30,7 +30,7 @@ export async function compressImage(file: File, maxDimension = 600, quality = 0.
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          resolve(reader.result as string);
+          reject(new Error('Canvas indisponível para comprimir a imagem'));
           return;
         }
 

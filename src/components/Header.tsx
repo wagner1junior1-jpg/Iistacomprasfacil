@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useModalA11y } from '../utils/useModalA11y';
 import { useShopping } from '../context/ShoppingContext';
 import {
   Menu,
@@ -59,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAddItem, onOpenExport, onO
   const [isMenuDropdownOpen, setIsMenuDropdownOpen] = useState(false);
   const [isNewListModalOpen, setIsNewListModalOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
+  const newListDialogRef = useModalA11y(isNewListModalOpen, () => setIsNewListModalOpen(false));
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   React.useEffect(() => {
@@ -504,7 +506,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAddItem, onOpenExport, onO
       {/* Create New List Modal */}
       {isNewListModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          <div ref={newListDialogRef} role="dialog" aria-modal="true" aria-label="Criar nova lista" className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
             <h3 className="text-base font-bold text-slate-900 dark:text-white mb-3">
               Criar Nova Lista de Compras
             </h3>

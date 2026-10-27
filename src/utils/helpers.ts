@@ -22,6 +22,12 @@ export function getMonthKey(date: Date = new Date()): string {
   return `${y}-${m}`;
 }
 
+// "YYYY-MM-DD" in the device's local timezone (toISOString would use UTC)
+export function getLocalDateKey(date: Date = new Date()): string {
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${getMonthKey(date)}-${d}`;
+}
+
 export function getNextMonthKey(currentMonthKey: string): string {
   const [year, month] = currentMonthKey.split('-').map(Number);
   const nextDate = new Date(year, month, 1); // JS 0-indexed month: month is next
@@ -155,13 +161,19 @@ export function compareBasketAcrossMarkets(items: ShoppingItem[], supermarkets: 
     };
   });
 
-  // Sort by lowest cost
-  results.sort((a, b) => a.totalCost - b.totalCost);
+  // Items that have some price (registered or fallback) in each market; items without any
+  // price add R$ 0 to the total, so markets are only comparable at equal pricing coverage.
+  const pricedCount = (r: MarketComparisonResult) => r.itemBreakdown.filter(b => b.price !== null).length;
+  const maxPriced = Math.max(...results.map(pricedCount));
 
-  if (results.length > 0 && results[0].totalCost > 0) {
-    results[0].isCheapest = true;
-    const highestCost = Math.max(...results.map(r => r.totalCost));
-    results.forEach(r => {
+  // Most priced items first, then lowest cost
+  results.sort((a, b) => pricedCount(b) - pricedCount(a) || a.totalCost - b.totalCost);
+
+  const comparable = results.filter(r => pricedCount(r) === maxPriced);
+  if (comparable.length > 0 && comparable[0].totalCost > 0) {
+    comparable[0].isCheapest = true;
+    const highestCost = Math.max(...comparable.map(r => r.totalCost));
+    comparable.forEach(r => {
       r.savingsVsHighest = highestCost - r.totalCost;
     });
   }

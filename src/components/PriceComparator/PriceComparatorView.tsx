@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useModalA11y } from '../../utils/useModalA11y';
 import { useShopping } from '../../context/ShoppingContext';
 import { compareBasketAcrossMarkets, formatCurrency } from '../../utils/helpers';
 import { getCategoryIcon } from '../../utils/icons';
@@ -37,6 +38,7 @@ export const PriceComparatorView: React.FC = () => {
     supermarketId: string;
     currentPrice: number | string;
   } | null>(null);
+  const priceDialogRef = useModalA11y(!!editingPriceData, () => setEditingPriceData(null));
 
   // Compare full basket across markets
   const basketComparison = useMemo(() => {
@@ -362,7 +364,7 @@ export const PriceComparatorView: React.FC = () => {
       {/* Quick Price Edit Modal */}
       {editingPriceData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-5 space-y-4">
+          <div ref={priceDialogRef} role="dialog" aria-modal="true" aria-label="Atualizar preço" className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="font-bold text-sm text-slate-900 dark:text-white">
                 Atualizar Preço no Supermercado

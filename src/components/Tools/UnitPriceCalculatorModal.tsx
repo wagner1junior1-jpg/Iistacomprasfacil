@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Scale, X, Sparkles, ArrowRight, CheckCircle2, RotateCcw } from 'lucide-react';
 import { formatCurrency } from '../../utils/helpers';
+import { useModalA11y } from '../../utils/useModalA11y';
 
 interface UnitPriceCalculatorModalProps {
   isOpen: boolean;
@@ -18,6 +19,11 @@ export const UnitPriceCalculatorModal: React.FC<UnitPriceCalculatorModalProps> =
   const [priceB, setPriceB] = useState('');
   const [qtyB, setQtyB] = useState('');
 
+  // Unidade digitada em cada embalagem: 'sub' = g / ml, 'base' = kg / L
+  const [unitA, setUnitA] = useState<'sub' | 'base'>('sub');
+  const [unitB, setUnitB] = useState<'sub' | 'base'>('sub');
+  const dialogRef = useModalA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const numPriceA = parseFloat(priceA.replace(',', '.')) || 0;
@@ -26,15 +32,21 @@ export const UnitPriceCalculatorModal: React.FC<UnitPriceCalculatorModalProps> =
   const numPriceB = parseFloat(priceB.replace(',', '.')) || 0;
   const numQtyB = parseFloat(qtyB.replace(',', '.')) || 0;
 
-  // Calcula custo padronizado (por kg / por litro / por unidade)
-  // Se for gramas, converte para kg multiplicando por 1000 se for digitado em gramas (< 100 assumimos kg ou o usuário escolhe)
-  const calculateNormalized = (price: number, qty: number) => {
+  // Calcula custo padronizado (por kg / por litro / por unidade).
+  // Quantidades em g / ml são convertidas para kg / L antes da divisão.
+  const calculateNormalized = (price: number, qty: number, unit: 'sub' | 'base') => {
     if (price <= 0 || qty <= 0) return null;
-    return price / qty;
+    const baseQty = unitType !== 'units' && unit === 'sub' ? qty / 1000 : qty;
+    return price / baseQty;
   };
 
-  const costPerUnitA = calculateNormalized(numPriceA, numQtyA);
-  const costPerUnitB = calculateNormalized(numPriceB, numQtyB);
+  const costPerUnitA = calculateNormalized(numPriceA, numQtyA, unitA);
+  const costPerUnitB = calculateNormalized(numPriceB, numQtyB, unitB);
+
+  const costUnitLabel = unitType === 'weight' ? 'kg' : unitType === 'volume' ? 'L' : 'un';
+  const unitOptions = unitType === 'weight'
+    ? { sub: 'g', base: 'kg' }
+    : { sub: 'ml', base: 'L' };
 
   let winner: 'A' | 'B' | 'equal' | null = null;
   let percentDiff = 0;
@@ -56,22 +68,49 @@ export const UnitPriceCalculatorModal: React.FC<UnitPriceCalculatorModalProps> =
     setQtyA('');
     setPriceB('');
     setQtyB('');
+    setUnitA('sub');
+    setUnitB('sub');
   };
 
-  const getUnitLabel = () => {
-    switch (unitType) {
-      case 'weight':
-        return 'g ou kg';
-      case 'volume':
-        return 'ml ou L';
-      case 'units':
-        return 'unidades';
-    }
-  };
+  // Campo de quantidade + seletor de unidade (g/kg ou ml/L) de uma embalagem
+  const renderQtyField = (
+    qty: string,
+    setQty: (v: string) => void,
+    unit: 'sub' | 'base',
+    setUnit: (v: 'sub' | 'base') => void,
+    placeholder: string
+  ) => (
+    <div>
+      <label className="block text-[11px] text-slate-500 dark:text-slate-400">
+        Quantidade{unitType === 'units' ? ' (unidades)' : ''}
+      </label>
+      <div className="flex gap-1.5">
+        <input
+          type="text"
+          inputMode="decimal"
+          placeholder={placeholder}
+          value={qty}
+          onChange={e => setQty(e.target.value)}
+          className="w-full min-w-0 p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+        />
+        {unitType !== 'units' && (
+          <select
+            value={unit}
+            onChange={e => setUnit(e.target.value as 'sub' | 'base')}
+            aria-label="Unidade de medida"
+            className="p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          >
+            <option value="sub">{unitOptions.sub}</option>
+            <option value="base">{unitOptions.base}</option>
+          </select>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl w-full max-w-md border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Tira-Teima de Preço" className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl w-full max-w-md border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
         
         {/* Header */}
         <div className="bg-[#2F7D4E] text-white px-5 py-4 flex items-center justify-between">
@@ -154,22 +193,12 @@ export const UnitPriceCalculatorModal: React.FC<UnitPriceCalculatorModalProps> =
                     className="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] text-slate-500 dark:text-slate-400">Qtd ({getUnitLabel()})</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="Ex: 350"
-                    value={qtyA}
-                    onChange={e => setQtyA(e.target.value)}
-                    className="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+                {renderQtyField(qtyA, setQtyA, unitA, setUnitA, 'Ex: 350')}
                 {costPerUnitA !== null && (
                   <div className="pt-1.5 border-t border-slate-200 dark:border-slate-700">
-                    <span className="text-[10px] text-slate-400 block">Preço unitário:</span>
+                    <span className="text-[10px] text-slate-400 block">Preço por {costUnitLabel}:</span>
                     <span className="font-bold font-mono text-xs text-slate-800 dark:text-white">
-                      R$ {costPerUnitA.toFixed(4)} / un
+                      R$ {costPerUnitA.toFixed(2)} / {costUnitLabel}
                     </span>
                   </div>
                 )}
@@ -205,22 +234,12 @@ export const UnitPriceCalculatorModal: React.FC<UnitPriceCalculatorModalProps> =
                     className="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] text-slate-500 dark:text-slate-400">Qtd ({getUnitLabel()})</label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="Ex: 500"
-                    value={qtyB}
-                    onChange={e => setQtyB(e.target.value)}
-                    className="w-full p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+                {renderQtyField(qtyB, setQtyB, unitB, setUnitB, 'Ex: 500')}
                 {costPerUnitB !== null && (
                   <div className="pt-1.5 border-t border-slate-200 dark:border-slate-700">
-                    <span className="text-[10px] text-slate-400 block">Preço unitário:</span>
+                    <span className="text-[10px] text-slate-400 block">Preço por {costUnitLabel}:</span>
                     <span className="font-bold font-mono text-xs text-slate-800 dark:text-white">
-                      R$ {costPerUnitB.toFixed(4)} / un
+                      R$ {costPerUnitB.toFixed(2)} / {costUnitLabel}
                     </span>
                   </div>
                 )}

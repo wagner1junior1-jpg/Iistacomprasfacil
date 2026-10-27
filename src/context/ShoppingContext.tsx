@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Category, Supermarket, ShoppingItem, ShoppingTrip, UserSettings, StorePrice, ShoppingListGroup } from '../types';
 import { StorageService } from '../services/storage';
-import { getMonthKey } from '../utils/helpers';
+import { getMonthKey, getLocalDateKey } from '../utils/helpers';
 
 interface ShoppingContextType {
   // State
@@ -303,7 +303,7 @@ export const ShoppingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             supermarketId,
             supermarketName,
             price,
-            lastUpdated: new Date().toISOString().slice(0, 10),
+            lastUpdated: getLocalDateKey(),
           };
 
           if (idx >= 0) {
@@ -379,7 +379,8 @@ export const ShoppingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     notes?: string;
     archiveBoughtItemsOnly?: boolean;
   }): ShoppingTrip => {
-    const boughtItems = items.filter(i => (archiveBoughtItemsOnly ? i.bought : true));
+    const isInActiveList = (i: ShoppingItem) => !i.listId || i.listId === activeListId;
+    const boughtItems = items.filter(i => isInActiveList(i) && (archiveBoughtItemsOnly ? i.bought : true));
     
     // Auto calculate if not passed
     let calculatedSpent = 0;
@@ -392,7 +393,7 @@ export const ShoppingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const finalTotalSpent = customTotalSpent !== undefined && customTotalSpent !== null ? customTotalSpent : calculatedSpent;
     const today = new Date();
-    const dateStr = today.toISOString().slice(0, 10);
+    const dateStr = getLocalDateKey(today);
     const monthStr = getMonthKey(today);
 
     const smFound = supermarkets.find(s => s.id === supermarketId);
@@ -416,10 +417,11 @@ export const ShoppingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setTrips(prev => [newTrip, ...prev]);
 
     // Archive or remove bought items from active list
+    // Only touch the active list; items from other lists are preserved
     if (archiveBoughtItemsOnly) {
-      setItems(prev => prev.filter(i => !i.bought));
+      setItems(prev => prev.filter(i => !(isInActiveList(i) && i.bought)));
     } else {
-      setItems([]);
+      setItems(prev => prev.filter(i => !isInActiveList(i)));
     }
 
     return newTrip;
@@ -451,9 +453,17 @@ export const ShoppingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
+  // Reload lists from storage and keep the active list valid
+  const syncListsFromStorage = () => {
+    const storedLists = StorageService.getLists();
+    setLists(storedLists);
+    setActiveListId(prev => (storedLists.some(l => l.id === prev) ? prev : storedLists[0]?.id || 'list-default'));
+  };
+
   // Export & Backups
   const resetData = () => {
     StorageService.resetAllData();
+    syncListsFromStorage();
     setCategories(StorageService.getCategories());
     setSupermarkets(StorageService.getSupermarkets());
     setItems(StorageService.getItems());
@@ -489,6 +499,7 @@ export const ShoppingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const importBackupJson = (json: string): boolean => {
     const success = StorageService.importJsonBackup(json);
     if (success) {
+      syncListsFromStorage();
       setCategories(StorageService.getCategories());
       setSupermarkets(StorageService.getSupermarkets());
       setItems(StorageService.getItems());

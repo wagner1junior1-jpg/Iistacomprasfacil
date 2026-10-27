@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useModalA11y } from '../../utils/useModalA11y';
 import { useShopping } from '../../context/ShoppingContext';
 import { Category, Supermarket } from '../../types';
 import { ICON_OPTIONS, COLOR_PALETTE, getCategoryIcon } from '../../utils/icons';
@@ -40,6 +41,8 @@ export const CategorySupermarketView: React.FC = () => {
   const [editingSupermarket, setEditingSupermarket] = useState<Supermarket | null>(null);
   const [smName, setSmName] = useState('');
   const [smColor, setSmColor] = useState(COLOR_PALETTE[3].hex);
+  const categoryDialogRef = useModalA11y(isCategoryModalOpen, () => setIsCategoryModalOpen(false));
+  const supermarketDialogRef = useModalA11y(isSupermarketModalOpen, () => setIsSupermarketModalOpen(false));
 
   // Open Add / Edit Category
   const handleOpenCatModal = (cat?: Category) => {
@@ -288,7 +291,7 @@ export const CategorySupermarketView: React.FC = () => {
       {/* Category Modal */}
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 space-y-4">
+          <div ref={categoryDialogRef} role="dialog" aria-modal="true" aria-label="Categoria" className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 space-y-4">
             
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -399,7 +402,7 @@ export const CategorySupermarketView: React.FC = () => {
       {/* Supermarket Modal */}
       {isSupermarketModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 space-y-4">
+          <div ref={supermarketDialogRef} role="dialog" aria-modal="true" aria-label="Supermercado" className="bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 space-y-4">
             
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">

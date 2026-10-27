@@ -387,9 +387,14 @@ export const ShoppingListView: React.FC = () => {
                       {formatCurrency(totals.totalBought)}
                     </span>
                     <button
-                      onClick={clearBoughtItems}
-                      className="text-xs text-red-600 dark:text-red-400 hover:underline p-1 cursor-pointer"
+                      onClick={() => {
+                        if (window.confirm(`Remover os ${cartItems.length} itens do carrinho? Essa ação não pode ser desfeita.`)) {
+                          clearBoughtItems();
+                        }
+                      }}
+                      className="text-xs text-red-600 dark:text-red-400 hover:underline p-2 cursor-pointer"
                       title="Remover itens comprados"
+                      aria-label="Remover itens comprados do carrinho"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>MercadoFácil - Compras Mensais & Comparador</title>
     <meta name="description" content="Sistema completo para compras mensais com comparador de preços entre supermercados, listas interativas offline, histórico de gastos, gráficos financeiros, modo escuro e exportação para planilhas." />
     
@@ -16,18 +16,6 @@
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png" />
-
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').then(function(reg) {
-            console.log('MercadoFácil: SW ativo:', reg.scope);
-          }).catch(function(err) {
-            console.warn('MercadoFácil: Erro SW:', err);
-          });
-        });
-      }
-    </script>
 
     <meta property="og:title" content="MercadoFácil - Lista e Comparador de Compras Mensal" />
     <meta property="og:description" content="Sistema completo para compras mensais com comparador de preços entre supermercados, listas interativas offline, histórico de gastos, gráficos financeiros, modo escuro e exportação para planilhas." />
@@ -44,7 +32,7 @@
             document.documentElement.classList.remove('dark');
             return;
           }
-          var settings = JSON.parse(localStorage.getItem('smart_shopping_settings') || '{}');
+          var settings = JSON.parse(localStorage.getItem('mercado_app_settings_v1') || '{}');
           if (settings.theme === 'dark') {
             document.documentElement.classList.add('dark');
           } else {

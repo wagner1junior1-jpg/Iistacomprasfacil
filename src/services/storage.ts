@@ -17,6 +17,7 @@ const KEYS = {
 };
 
 import { IdbStorage } from './idbStorage';
+import { getLocalDateKey } from '../utils/helpers';
 
 // Safe JSON parse helper
 function safeGet<T>(key: string, fallback: T): T {
@@ -35,9 +36,30 @@ function safeSet<T>(key: string, value: T): void {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (err) {
     console.warn(`[StorageService] LocalStorage indisponível ou quota excedida para ${key}, usando apenas IndexedDB:`, err);
+    // Remove a cópia antiga para ela não "ressuscitar" dados desatualizados no próximo boot;
+    // restoreFromIdb() recupera a versão atual do IndexedDB.
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // localStorage totalmente indisponível
+    }
   }
   // Sincroniza sempre no IndexedDB de forma assíncrona
   IdbStorage.set(key, value).catch(() => {});
+}
+
+// Número no formato brasileiro (vírgula decimal) para o Excel/Sheets reconhecer como número
+function formatCsvNumber(value: number): string {
+  return value.toFixed(2).replace('.', ',');
+}
+
+// Neutraliza injeção de fórmula (CWE-1236): células iniciadas por = + - @ viram texto
+function sanitizeCsvCell(value: unknown): string {
+  let str = String(value ?? '');
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
+  return `"${str.replace(/"/g, '""')}"`;
 }
 
 export const StorageService = {
@@ -137,6 +159,7 @@ export const StorageService = {
   // Reset to default seed
   resetAllData(): void {
     IdbStorage.clear().catch(() => {});
+    safeSet(KEYS.LISTS, DEFAULT_LIST_GROUPS);
     safeSet(KEYS.CATEGORIES, DEFAULT_CATEGORIES);
     safeSet(KEYS.SUPERMARKETS, DEFAULT_SUPERMARKETS);
     safeSet(KEYS.ITEMS, INITIAL_SHOPPING_ITEMS);
@@ -144,16 +167,21 @@ export const StorageService = {
     safeSet(KEYS.SETTINGS, DEFAULT_SETTINGS);
   },
 
-  // Sincronização de recuperação: se o LocalStorage foi limpo mas o IndexedDB tem dados
-  async syncRecoveryFromIdb(): Promise<boolean> {
-    try {
-      const idbItems = await IdbStorage.get(KEYS.ITEMS, null);
-      if (idbItems && !localStorage.getItem(KEYS.ITEMS)) {
-        safeSet(KEYS.ITEMS, idbItems);
-        return true;
+  // Recuperação no boot: se uma chave sumiu do LocalStorage (limpeza do navegador/WebView)
+  // mas o IndexedDB ainda tem os dados, copia de volta ANTES de qualquer leitura/seed.
+  // Deve ser aguardado antes de montar o React.
+  async restoreFromIdb(): Promise<void> {
+    for (const key of Object.values(KEYS)) {
+      try {
+        if (localStorage.getItem(key) !== null) continue;
+        const value = await IdbStorage.get<unknown>(key, null);
+        if (value !== null && value !== undefined) {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      } catch {
+        // Sem IndexedDB ou localStorage cheio: segue com o que houver
       }
-    } catch {}
-    return false;
+    }
   },
 
   // Export full JSON Backup
@@ -161,6 +189,7 @@ export const StorageService = {
     const data = {
       version: '1.0',
       exportedAt: new Date().toISOString(),
+      lists: this.getLists(),
       categories: this.getCategories(),
       supermarkets: this.getSupermarkets(),
       items: this.getItems(),
@@ -174,6 +203,18 @@ export const StorageService = {
   importJsonBackup(jsonString: string): boolean {
     try {
       const data = JSON.parse(jsonString);
+      if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+
+      // Valida o formato antes de gravar qualquer coisa, para um arquivo inválido não corromper os dados
+      const arrayKeys = ['lists', 'categories', 'supermarkets', 'items', 'trips'] as const;
+      const hasKnownKey = arrayKeys.some(k => k in data) || 'settings' in data;
+      if (!hasKnownKey) return false;
+      for (const k of arrayKeys) {
+        if (k in data && !Array.isArray(data[k])) return false;
+      }
+      if ('settings' in data && (typeof data.settings !== 'object' || data.settings === null)) return false;
+
+      if (data.lists?.length) this.saveLists(data.lists);
       if (data.categories) this.saveCategories(data.categories);
       if (data.supermarkets) this.saveSupermarkets(data.supermarkets);
       if (data.items) this.saveItems(data.items);
@@ -199,8 +240,8 @@ export const StorageService = {
     // Current Shopping List items
     currentItems.forEach(item => {
       const unitPrice = item.actualPrice ?? item.estimatedPrice ?? 0;
-      const totalItemPrice = unitPrice > 0 ? (unitPrice * item.quantity).toFixed(2) : 'Não informado';
-      const formattedUnitPrice = unitPrice > 0 ? unitPrice.toFixed(2) : 'Não informado';
+      const totalItemPrice = unitPrice > 0 ? formatCsvNumber(unitPrice * item.quantity) : 'Não informado';
+      const formattedUnitPrice = unitPrice > 0 ? formatCsvNumber(unitPrice) : 'Não informado';
       const catName = catMap.get(item.categoryId) || 'Geral';
       const smName = item.supermarketId ? (smMap.get(item.supermarketId) || item.supermarketId) : 'Qualquer';
 
@@ -226,8 +267,8 @@ export const StorageService = {
 
       trip.items.forEach(item => {
         const unitPrice = item.actualPrice ?? item.estimatedPrice ?? 0;
-        const totalItemPrice = unitPrice > 0 ? (unitPrice * item.quantity).toFixed(2) : '0.00';
-        const formattedUnitPrice = unitPrice > 0 ? unitPrice.toFixed(2) : '0.00';
+        const totalItemPrice = unitPrice > 0 ? formatCsvNumber(unitPrice * item.quantity) : '0,00';
+        const formattedUnitPrice = unitPrice > 0 ? formatCsvNumber(unitPrice) : '0,00';
         const catName = catMap.get(item.categoryId) || 'Geral';
 
         rows.push([
@@ -248,7 +289,7 @@ export const StorageService = {
 
     // Convert to CSV with semicolon separator for Brazilian Excel locale
     const csvContent = rows
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))
+      .map(row => row.map(sanitizeCsvCell).join(';'))
       .join('\r\n');
 
     // Add UTF-8 Byte Order Mark (BOM) so Excel opens accents properly
@@ -256,7 +297,7 @@ export const StorageService = {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `compras_mensais_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `compras_mensais_${getLocalDateKey()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
