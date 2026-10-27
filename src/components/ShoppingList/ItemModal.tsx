@@ -32,6 +32,10 @@ interface ItemModalProps {
   onDelete?: (id: string) => void;
 }
 
+// Reconhecimento de voz não existe no WebView do app Android; só mostra o microfone onde há suporte
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const hasSpeechRecognition = typeof window !== 'undefined' && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+
 const UNIT_OPTIONS: { value: UnitType; label: string }[] = [
   { value: 'un', label: 'un' },
   { value: 'kg', label: 'kg' },
@@ -327,6 +331,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({
                 className="w-full pb-2 pt-1 border-b-2 border-slate-300 dark:border-slate-700 focus:border-[#2F7D4E] dark:focus:border-emerald-400 bg-transparent text-base text-slate-900 dark:text-white placeholder-slate-400 outline-none transition-colors pr-10"
                 autoFocus={!itemToEdit}
               />
+              {hasSpeechRecognition && (
               <button
                 type="button"
                 onClick={toggleVoiceInput}
@@ -339,6 +344,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({
               >
                 {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
               </button>
+              )}
             </div>
 
             {/* Catalog Autocomplete Suggestions Dropdown */}

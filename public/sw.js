@@ -1,5 +1,5 @@
 // Service Worker para MercadoFácil - Compras Mensais & Comparador
-const CACHE_NAME = 'mercadofacil-cache-v11';
+const CACHE_NAME = 'mercadofacil-cache-v12';
 
 const STATIC_ASSETS = [
   '/',
@@ -9,9 +9,6 @@ const STATIC_ASSETS = [
   '/icons/icon-512.png',
   '/icons/icon.svg',
 ];
-
-// Hosts de fontes: respostas cross-origin (CSS opaco + arquivos CORS) também entram no cache
-const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 // Lê o index.html publicado e devolve os assets com hash gerados pelo Vite (/assets/*.js|css),
 // para que o app inteiro abra offline mesmo que o usuário nunca tenha navegado por todas as telas.
@@ -33,13 +30,6 @@ self.addEventListener('install', (event) => {
       await cache.addAll(STATIC_ASSETS);
       const buildAssets = await getBuildAssets();
       await Promise.all(buildAssets.map((asset) => cache.add(asset).catch(() => {})));
-      // Fontes: melhor esforço (falha silenciosa se estiver sem internet na instalação)
-      await cache
-        .add(new Request(
-          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
-          { mode: 'no-cors' }
-        ))
-        .catch(() => {});
     })
   );
   self.skipWaiting();
@@ -61,12 +51,7 @@ self.addEventListener('activate', (event) => {
 });
 
 function shouldCache(url, networkResponse) {
-  if (!networkResponse) return false;
-  if (FONT_HOSTS.includes(url.hostname)) {
-    // Folha de estilo de fonte é opaca (status 0); arquivos de fonte são 'cors'
-    return networkResponse.ok || networkResponse.type === 'opaque';
-  }
-  return networkResponse.status === 200 && networkResponse.type === 'basic';
+  return !!networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic';
 }
 
 // Estratégia de Fetch: Cache-first com fallback para rede e cache dinâmico de assets

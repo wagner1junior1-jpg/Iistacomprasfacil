@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useModalA11y } from '../utils/useModalA11y';
 import { useShopping } from '../context/ShoppingContext';
 import {
@@ -93,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAddItem, onOpenExport, onO
   return (
     <>
       {/* Top Header Bar - Exact style of screenshots */}
-      <header className="sticky top-0 z-40 bg-[#2F7D4E] text-white shadow-md select-none">
+      <header className="sticky top-0 z-40 bg-[#2F7D4E] text-white shadow-md select-none pt-[env(safe-area-inset-top,0px)]">
         <div className="max-w-4xl mx-auto px-2 sm:px-4 h-14 flex items-center justify-between">
           
           {/* Left: Hamburger Menu & Title */}
@@ -474,7 +475,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAddItem, onOpenExport, onO
                 <span>Exportar Planilha Excel</span>
               </button>
 
-              {/* Install PWA Button */}
+              {/* Install PWA Button (não faz sentido dentro do app da Play Store) */}
+              {!Capacitor.isNativePlatform() && (
               <button
                 onClick={() => {
                   setIsDrawerOpen(false);
@@ -485,6 +487,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAddItem, onOpenExport, onO
                 <Smartphone className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 <span className="font-bold">Instalar App no Celular</span>
               </button>
+              )}
             </div>
 
             {/* Drawer Footer */}

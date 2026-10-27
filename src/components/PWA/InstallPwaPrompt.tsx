@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useModalA11y } from '../../utils/useModalA11y';
 import { Download, X, Share, Smartphone, Sparkles, CheckCircle2 } from 'lucide-react';
 
@@ -22,7 +23,7 @@ export const InstallPwaPrompt: React.FC = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window.navigator as any).standalone === true;
 
-    if (isRunningStandalone) {
+    if (isRunningStandalone || Capacitor.isNativePlatform()) {
       setIsStandalone(true);
       return;
     }
