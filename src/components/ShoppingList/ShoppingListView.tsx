@@ -432,7 +432,7 @@ export const ShoppingListView: React.FC = () => {
       <button
         id="fab-add-item"
         onClick={() => setIsCatalogModalOpen(true)}
-        className="fixed right-5 bottom-32 z-30 w-14 h-14 rounded-full bg-[#2F7D4E] hover:bg-emerald-700 active:scale-95 text-white shadow-2xl flex items-center justify-center transition-all cursor-pointer hover:shadow-emerald-600/40"
+        className="fixed right-5 bottom-[calc(8rem+env(safe-area-inset-bottom,0px))] z-30 w-14 h-14 rounded-full bg-[#2F7D4E] hover:bg-emerald-700 active:scale-95 text-white shadow-2xl flex items-center justify-center transition-all cursor-pointer hover:shadow-emerald-600/40"
         title="Adicionar produtos pelo catálogo"
         aria-label="Adicionar produtos"
       >
@@ -440,7 +440,7 @@ export const ShoppingListView: React.FC = () => {
       </button>
 
       {/* Bottom Sticky Status Bar - Positioned above BottomNavBar */}
-      <div className="fixed bottom-16 left-0 right-0 z-30 bg-[#B8DAC0] dark:bg-[#1A3F2C] border-t border-[#9FC8A8] dark:border-emerald-800 select-none shadow-lg">
+      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-30 bg-[#B8DAC0] dark:bg-[#1A3F2C] border-t border-[#9FC8A8] dark:border-emerald-800 select-none shadow-lg">
         <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center justify-between text-slate-800 dark:text-emerald-50">
           
           {/* Left: Total */}

@@ -55,7 +55,7 @@ A chave de upload foi criada em `android/keystore/mercadofacil-upload.jks`, com 
 8. **Ficha da loja** — materiais prontos em `play-store/`:
    - Ícone 512×512: `play-store/icon-512.png`
    - Imagem de destaque 1024×500: `play-store/feature-graphic-1024x500.png`
-   - Capturas de tela de celular (mínimo 2): `play-store/screenshots/` (1080×2400)
+   - Capturas de tela de celular (mínimo 2): `play-store/screenshots/` (1080×1920, 9:16)
 9. **Testes obrigatórios para conta pessoal nova**: contas de desenvolvedor pessoais criadas depois de
    nov/2023 precisam rodar um **teste fechado com pelo menos 12 testadores por 14 dias seguidos**
    antes de pedir acesso à produção. Confira as regras atuais na Play Console, pois mudam.

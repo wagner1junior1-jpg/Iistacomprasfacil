@@ -374,8 +374,8 @@ export const FinancialDashboardView: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-4 h-64">
-              <div className="h-full w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-4 sm:h-64">
+              <div className="h-56 sm:h-full w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie

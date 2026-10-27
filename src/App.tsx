@@ -50,7 +50,7 @@ const MainContent: React.FC = () => {
       />
 
       {/* Main Container */}
-      <main className="flex-1 w-full max-w-5xl mx-auto pb-20">
+      <main className="flex-1 w-full max-w-5xl mx-auto pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
         {activeTab === 'list' && <ShoppingListView />}
         {activeTab === 'comparator' && (
           <div className="p-3 sm:p-6">
