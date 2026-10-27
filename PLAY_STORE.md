@@ -43,8 +43,8 @@ A chave de upload foi criada em `android/keystore/mercadofacil-upload.jks`, com 
 
 1. **Criar o app** (nome: MercadoFácil, idioma padrão: Português (Brasil), tipo: App, gratuito).
 2. **Política de privacidade**: o arquivo `public/politica-de-privacidade.html` vai junto com o site.
-   - Preencha seu e-mail no final da página (`[SEU E-MAIL DE CONTATO]`).
-   - Faça o deploy do site (ex.: Vercel) e informe a URL: `https://SEU-DOMINIO/politica-de-privacidade.html`.
+   - E-mail de contato já preenchido na página: wagner1junior1@gmail.com.
+   - URL a informar na Play Console: `https://iistacomprasfacil.vercel.app/politica-de-privacidade.html` (só funciona depois que este código for publicado na Vercel).
 3. **Segurança dos dados (Data safety)**:
    - Coleta ou compartilha dados do usuário? **Não**.
    - (O app não tem permissão de internet, anúncios nem analytics; a câmera é só para foto opcional, guardada no aparelho.)
